@@ -6,14 +6,20 @@ from openpyxl import styles
 import time
 import imgkit
 import html2img
+import json
+
+with open('config.json', 'r') as f:
+    config = json.load(f)
+
 class Record:
     def __init__(self, phone, text):
-        self.t = text
         self.p = phone
+        self.contents = []
+        self.contents.append(text)
 wb = Workbook()
-wb = load_workbook('file.xlsx', read_only=True)
-api_id = 12345
-api_hash = 'api-hash'
+wb = load_workbook(config["file_name"], read_only=True)
+api_id = config["api_id"] #1240210
+api_hash = config["api_hash"] #'5a68ce5b77fc12870b3542c8f31483ad'
 client = TelegramClient('session_name', api_id, api_hash)
 client.start()
 sheets = wb.sheetnames
@@ -21,6 +27,8 @@ ws = wb[sheets[0]]
 header_row = ws[1]
 ph_col = ws.max_column
 contact_row = {}
+max_row=config["max_row_in_iamge"]
+rows_in_image = 0
 header = "<tr>"
 for i in range(0,ph_col):
     if header_row[i].value == 'phone':
@@ -45,18 +53,25 @@ for row in ws.rows:
     phone_num = row[ph_col].value
     phone_contract = phone_num + "_"+str(+row[ph_col-1].value)
     if  phone_contract in contact_row:
-        contact_row[phone_contract].t += text
+        if rows_in_image < 20:
+            contact_row[phone_contract].contents[-1]+=text
+            rows_in_image+=1
+        else:
+            contact_row[phone_contract].contents.append(text)
+            rows_in_image = 1
     else:
         r = Record(phone_num,text)
+        rows_in_image = 1
         contact_row[phone_contract] = r
 for key in list(contact_row.keys()):
-    imgkit.from_string(html2img.prepare_body(header+contact_row[key].t),'name.jpg')
-    try:
-        user = client.get_entity(contact_row[key].p)
-        client.send_file(user, "name.jpg")
-    except errors.FloodWaitError as e:
-        print('Have to sleep', e.seconds, 'seconds')
-        client.disconnect()
-        client.start()
-        user = client.get_entity(contact_row[key].p)
-        client.send_file(user, "name.jpg")
+    for content in contact_row[key].contents:
+        imgkit.from_string(html2img.prepare_body(header+content),'name.jpg')
+        try:
+            user = client.get_entity(contact_row[key].p)
+            client.send_file(user, "name.jpg")
+        except errors.FloodWaitError as e:
+            print('Have to sleep', e.seconds, 'seconds')
+            client.disconnect()
+            client.start()
+            user = client.get_entity(contact_row[key].p)
+            client.send_file(user, "name.jpg")

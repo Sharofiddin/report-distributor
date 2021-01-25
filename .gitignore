@@ -128,3 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 file.xlsx
+name.jpg
+session_name.session
+config.json
+file1.xlsx
