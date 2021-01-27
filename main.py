@@ -18,8 +18,8 @@ class Record:
         self.contents.append(text)
 wb = Workbook()
 wb = load_workbook(config["file_name"], read_only=True)
-api_id = config["api_id"] #1240210
-api_hash = config["api_hash"] #'5a68ce5b77fc12870b3542c8f31483ad'
+api_id = config["api_id"]
+api_hash = config["api_hash"]
 client = TelegramClient('session_name', api_id, api_hash)
 client.start()
 sheets = wb.sheetnames
