@@ -18,7 +18,7 @@ import imgkit
 from datetime import datetime
 import os
 img_opts = {
-  "enable-local-file-access": True
+  "enable-local-file-access": None
 }
 IMAGE = os.path.dirname(os.path.abspath(__file__)) + '/name.jpg'
 # Some configuration for the app
