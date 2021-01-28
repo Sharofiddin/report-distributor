@@ -17,6 +17,9 @@ from telethon import TelegramClient, events, utils
 import imgkit
 from datetime import datetime
 import os
+img_opts = {
+  "enable-local-file-access": None
+}
 IMAGE = os.path.dirname(os.path.abspath(__file__)) + '/name.jpg'
 # Some configuration for the app
 TITLE = 'Report distributor'
@@ -215,7 +218,7 @@ class App(tkinter.Tk):
             await self.cl.send_message(user, str(result[key].contract))
             for content in result[key].contents:
                 imgkit.from_string(prepare_body(
-                    excel_processor.header+content), IMAGE )
+                    excel_processor.header+content), IMAGE, options=img_opts )
                 await self.cl.send_file(user, IMAGE)
             text = TEMPLATE_END_LOG.format( datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
             self.log.insert(tkinter.END, text)
