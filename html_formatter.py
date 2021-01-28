@@ -1,5 +1,7 @@
-import os
-STYLE = os.path.dirname(os.path.abspath(__file__)) + '/style.css'
+import json
+with open('config.json', 'r') as f:
+    config = json.load(f)
+STYLE = config['style']
 def prepare_body(text):
     body = """
     <html>
