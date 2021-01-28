@@ -16,7 +16,8 @@ from html_formatter import prepare_body
 from telethon import TelegramClient, events, utils
 import imgkit
 from datetime import datetime
-from tkinter import ttk
+import os
+IMAGE = os.path.dirname(os.path.abspath(__file__)) + '/name.jpg'
 # Some configuration for the app
 TITLE = 'Report distributor'
 SIZE = '640x280'
@@ -66,6 +67,7 @@ def allow_copy(widget):
 class App(tkinter.Tk):
     def __init__(self, client, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
         self.cl = client
         self.me = None
 
@@ -87,10 +89,8 @@ class App(tkinter.Tk):
         tkinter.Label(self, text='Target:').grid(row=1, column=0)
 
         self.chat = tkinter.Entry(self)
-        self.chat.grid(row=1, column=1, columnspan=2, sticky=tkinter.EW)
+        self.chat.grid(row=1, column=1, sticky=tkinter.EW)
         self.columnconfigure(1, weight=1)
-        self.chat.focus()
-        self.chat_id = None
         tkinter.Button(self, text='Browse',
                        command=self.choose_file).grid(row=1, column=2)
         # Message log (incoming and outgoing); we configure it as readonly
@@ -215,13 +215,12 @@ class App(tkinter.Tk):
             await self.cl.send_message(user, str(result[key].contract))
             for content in result[key].contents:
                 imgkit.from_string(prepare_body(
-                    excel_processor.header+content), 'name.jpg')
-                await self.cl.send_file(user, "name.jpg")
+                    excel_processor.header+content), IMAGE )
+                await self.cl.send_file(user, IMAGE)
             text = TEMPLATE_END_LOG.format( datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
             self.log.insert(tkinter.END, text)
         self.chat.configure(state=tkinter.NORMAL)
         self.send_message_btn.configure(state=tkinter.NORMAL)
-        self.enable()
 
     @callback
     async def choose_file(self, event=None):
