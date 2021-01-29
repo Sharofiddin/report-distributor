@@ -9,7 +9,7 @@ def prepare_body(text):
         <meta  content="png"/>
         <meta  content="Landscape"/>
         <meta charset="UTF-8">
-        <link rel="stylesheet" href="{}">
+        <link rel="stylesheet" href="{}" type="text/css">
     </head>
     <table>
         {}
