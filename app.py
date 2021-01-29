@@ -219,11 +219,8 @@ class App(tkinter.Tk):
             user = await self.cl.get_entity(result[key].phone)
             await self.cl.send_message(user, str(result[key].contract))
             for content in result[key].contents:
-                html = prepare_body(
-                    excel_processor.header+content)
+                html = prepare_body(excel_processor.header+content)
                 imgkit.from_string(html, IMAGE, options=img_opts )
-                f = open("demofile3.html", "w")
-                f.write(html)
                 await self.cl.send_file(user, IMAGE)
             text = TEMPLATE_END_LOG.format( datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
             self.log.insert(tkinter.END, text)

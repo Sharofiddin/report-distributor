@@ -16,5 +16,4 @@ def prepare_body(text):
     </table>
     </html>
     """
-    print(STYLE)
     return body.format(STYLE,text)
