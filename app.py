@@ -165,14 +165,16 @@ class App(tkinter.Tk):
         This callback logs out if authorized, signs in if a code was
         sent or a bot token is input, or sends the code otherwise.
         """
-        self.sign_in_label.configure(text='Working...')
-        self.sign_in_entry.configure(state=tkinter.DISABLED)
         if await self.cl.is_user_authorized():
             await self.cl.log_out()
             self.destroy()
             return
-
         value = self.sign_in_entry.get().strip()
+        if not value:
+            return
+
+        self.sign_in_label.configure(text='Working...')
+        self.sign_in_entry.configure(state=tkinter.DISABLED)
         if self.code:
             self.set_signed_in(await self.cl.sign_in(code=value))
         elif ':' in value:
