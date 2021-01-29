@@ -134,3 +134,5 @@ config.json
 file1.xlsx
 gui.session
 config.json~
+*.lock.*
+.~lock.file.xlsx#

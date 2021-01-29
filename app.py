@@ -20,6 +20,8 @@ import os
 img_opts = {
   "enable-local-file-access": None
 }
+with open('style.css') as f:
+    css=f.read
 IMAGE = os.path.dirname(os.path.abspath(__file__)) + '/name.jpg'
 # Some configuration for the app
 TITLE = 'Report distributor'
