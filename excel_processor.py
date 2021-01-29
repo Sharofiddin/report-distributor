@@ -50,7 +50,8 @@ class ExcelProcessor:
                 break
             text = "<tr>"
             for j in range(0,ph_col):
-                color = '#'+str(row[j].fill.start_color.value)
+                colorvalue = row[j].fill.start_color.value
+                color = '#' + str(row[j].fill.start_color.value)[2:] if colorvalue != '00000000' else '#FFFFFF'
                 text += ('<td nowrap="nowrap" bgcolor="{}" >{}</td>').format(color,str(row[j].value))
             text+="</tr>"
             phone_num = row[ph_col].value
