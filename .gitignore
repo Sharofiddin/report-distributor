@@ -136,3 +136,4 @@ gui.session
 config.json~
 *.lock.*
 .~lock.file.xlsx#
+dist.rar
