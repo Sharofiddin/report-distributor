@@ -166,8 +166,10 @@ class App(tkinter.Tk):
         sent or a bot token is input, or sends the code otherwise.
         """
         if await self.cl.is_user_authorized():
+            print('logging out ...')
             await self.cl.log_out()
             self.destroy()
+            print('log out finished')
             return
         value = self.sign_in_entry.get().strip()
         if not value:
@@ -176,10 +178,12 @@ class App(tkinter.Tk):
         self.sign_in_label.configure(text='Working...')
         self.sign_in_entry.configure(state=tkinter.DISABLED)
         if self.code:
+            print('code inserted')
             self.set_signed_in(await self.cl.sign_in(code=value))
         elif ':' in value:
             self.set_signed_in(await self.cl.sign_in(bot_token=value))
         else:
+            print('phone inserted')
             self.code = await self.cl.send_code_request(value)
             self.sign_in_label.configure(text='Code:')
             self.sign_in_entry.configure(state=tkinter.NORMAL)
@@ -209,6 +213,7 @@ class App(tkinter.Tk):
         self.chat.configure(state=tkinter.DISABLED)
         self.send_message_btn.configure(state=tkinter.DISABLED)
         excel_processor = ExcelProcessor(self.chat.get())
+        print('file is choosed', self.chat.get(), sep=' = ' )
         result = excel_processor.process_file()
         print('Excel content is parsed. Sending started...')
         for key in list(result.keys()):
