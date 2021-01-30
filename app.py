@@ -210,6 +210,7 @@ class App(tkinter.Tk):
         self.send_message_btn.configure(state=tkinter.DISABLED)
         excel_processor = ExcelProcessor(self.chat.get())
         result = excel_processor.process_file()
+        print('Excel content is parsed. Sending started...')
         for key in list(result.keys()):
             text = TEMPLATE_START_LOG.format(datetime.now().strftime("%m/%d/%Y, %H:%M:%S") , 
                 result[key].phone ,
