@@ -69,4 +69,5 @@ class ExcelProcessor:
                 r = ImageRecord(phone_num,contract,text)
                 rows_in_image = 1
                 contact_row[phone_contract] = r
+             print('processing row is finished')
         return contact_row
