@@ -2,11 +2,7 @@ from openpyxl import Workbook
 from openpyxl import load_workbook
 import json
 import traceback
-# def start_client():
-#     api_id = config["api_id"] 
-#     api_hash = config["api_hash"] 
-#     client = TelegramClient('session_name', api_id, api_hash)
-#     client.start()
+
 with open('config.json', 'r') as f:
     config = json.load(f)
 
@@ -25,7 +21,6 @@ class ExcelProcessor:
         try:
             wb = Workbook()
             wb = load_workbook(self.file_name, read_only=True)
-
             sheets = wb.sheetnames
             ws = wb[sheets[0]]
             header_row = ws[1]
@@ -51,8 +46,10 @@ class ExcelProcessor:
                     break
                 text = "<tr>"
                 for j in range(0,ph_col):
-                    colorvalue = row[j].fill.start_color.value
-                    color = '#' + str(row[j].fill.start_color.value)[2:] if colorvalue != '00000000' else '#FFFFFF'
+                    colorvalue = str(row[j].fill.start_color.value)[2:]
+                    color = '#' + colorvalue if colorvalue != '000000' and len(colorvalue) == 6 else '#FFFFFF'
+                    # if counter > 17 and counter < 25 and j == 0:
+                        # print(str(counter),color,str(row[j].fill.start_color.value),sep=' | ')
                     text += ('<td bgcolor="{}" >{}</td>').format(color,str(row[j].value))
                 text+="</tr>"
                 phone_num = row[ph_col].value
@@ -75,3 +72,4 @@ class ExcelProcessor:
         except:
             traceback.print_exc()
             return None
+ExcelProcessor('file_3.xlsx').process_file()

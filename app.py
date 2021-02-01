@@ -225,7 +225,7 @@ class App(tkinter.Tk):
             self.log.insert(tkinter.END, text)
             self.log.yview(tkinter.END)
             user = await self.cl.get_entity(result[key].phone)
-            await self.cl.send_message(user, str(result[key].contract))
+            # await self.cl.send_message(user, str(result[key].contract))
             for content in result[key].contents:
                 html = prepare_body(excel_processor.header+content)
                 imgkit.from_string(html, IMAGE, options=img_opts )
