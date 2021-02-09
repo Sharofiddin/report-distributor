@@ -17,11 +17,19 @@ from telethon import TelegramClient, events, utils
 import imgkit
 from datetime import datetime
 import os
+import re
+
+
+def is_phone_number(param):
+    pattern = re.compile('^\+9989[0-9]\d{7}$')
+    return pattern.match("".join(param.split()))
+
+
 img_opts = {
-  "enable-local-file-access": None
+    "enable-local-file-access": None
 }
 with open('style.css') as f:
-    css=f.read
+    css = f.read
 IMAGE = os.path.dirname(os.path.abspath(__file__)) + '/name.jpg'
 # Some configuration for the app
 TITLE = 'Report distributor'
@@ -31,6 +39,8 @@ DELETE = re.compile(r'\.d\s*(\d+)', re.IGNORECASE)
 EDIT = re.compile(r'\.s(.+?[^\\])/(.*)', re.IGNORECASE)
 TEMPLATE_START_LOG = '{} - Sending started phone: {}, contract number: {}, records: {}, image count: {}\n'
 TEMPLATE_END_LOG = '{} - Sending end.\n'
+
+
 def get_env(name, message, cast=str):
     if name in os.environ:
         return os.environ[name]
@@ -56,6 +66,7 @@ def sanitize_str(string):
     return ''.join(x if ord(x) <= 0xffff else
                    '{{{:x}ū}}'.format(ord(x)) for x in string)
 
+
 def callback(func):
     @functools.wraps(func)
     def wrapped(*args, **kwargs):
@@ -69,10 +80,12 @@ def callback(func):
 def allow_copy(widget):
     widget.bind('<Control-c>', lambda e: None)
     widget.bind('<Key>', lambda e: "break")
+
+
 class App(tkinter.Tk):
     def __init__(self, client, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
         self.cl = client
         self.me = None
 
@@ -105,17 +118,15 @@ class App(tkinter.Tk):
         self.rowconfigure(2, weight=1)
         self.cl.add_event_handler(self.on_message, events.NewMessage)
 
-        # Save shown message IDs to support replying with ".rN reply"
-        # For instance to reply to the last message ".r1 this is a reply"
-        # Deletion also works with ".dN".
         self.message_ids = []
 
         self.send_message_btn = tkinter.Button(self, text='Send',
-                       command=self.send_message)
+                                               command=self.send_message)
         self.send_message_btn.grid(row=3, column=2)
 
         # Post-init (async, connect client)
         self.cl.loop.create_task(self.post_init())
+
     async def post_init(self):
         if await self.cl.is_user_authorized():
             self.set_signed_in(await self.cl.get_me())
@@ -126,9 +137,6 @@ class App(tkinter.Tk):
                 text='Sign in (phone):')
 
     async def on_message(self, event):
-        """
-        Event handler that will add new messages to the message log.
-        """
         # We want to show only messages sent to this chat
         if event.chat_id != self.chat_id:
             return
@@ -158,13 +166,6 @@ class App(tkinter.Tk):
     # noinspection PyUnusedLocal
     @callback
     async def sign_in(self, event=None):
-        """
-        Note the `event` argument. This is required since this callback
-        may be called from a ``widget.bind`` (such as ``'<Return>'``),
-        which sends information about the event we don't care about.
-        This callback logs out if authorized, signs in if a code was
-        sent or a bot token is input, or sends the code otherwise.
-        """
         if await self.cl.is_user_authorized():
             print('logging out ...')
             await self.cl.log_out()
@@ -192,10 +193,6 @@ class App(tkinter.Tk):
             return
 
     def set_signed_in(self, me):
-        """
-        Configures the application as "signed in" (displays user's
-        name and disables the entry to input phone/bot token/code).
-        """
         self.me = me
         self.sign_in_label.configure(text='Signed in')
         self.sign_in_entry.configure(state=tkinter.NORMAL)
@@ -213,24 +210,27 @@ class App(tkinter.Tk):
         self.chat.configure(state=tkinter.DISABLED)
         self.send_message_btn.configure(state=tkinter.DISABLED)
         excel_processor = ExcelProcessor(self.chat.get())
-        print('file is choosed', self.chat.get(), sep=' = ' )
+        print('file is choosed', self.chat.get(), sep=' = ')
         result = excel_processor.process_file()
         print('Excel content is parsed. Sending started...')
         for key in list(result.keys()):
-            text = TEMPLATE_START_LOG.format(datetime.now().strftime("%m/%d/%Y, %H:%M:%S") , 
-                result[key].phone ,
-                result[key].contract, 
-                result[key].count,
-                len(result[key].contents ))
+            text = TEMPLATE_START_LOG.format(datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+                                             result[key].phone,
+                                             result[key].contract,
+                                             result[key].count,
+                                             len(result[key].contents))
             self.log.insert(tkinter.END, text)
             self.log.yview(tkinter.END)
-            user = await self.cl.get_entity(result[key].phone)
+
+            user = await self.cl.get_entity(result[key].phone) if is_phone_number(result[key].phone) else await self.get_private_group(result[key].phone)
             # await self.cl.send_message(user, str(result[key].contract))
+            print("user",user, sep='=')
             for content in result[key].contents:
                 html = prepare_body(excel_processor.header+content)
-                imgkit.from_string(html, IMAGE, options=img_opts )
+                imgkit.from_string(html, IMAGE, options=img_opts)
                 await self.cl.send_file(user, IMAGE)
-            text = TEMPLATE_END_LOG.format( datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
+            text = TEMPLATE_END_LOG.format(
+                datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
             self.log.insert(tkinter.END, text)
         self.chat.configure(state=tkinter.NORMAL)
         self.send_message_btn.configure(state=tkinter.NORMAL)
@@ -245,6 +245,11 @@ class App(tkinter.Tk):
         self.chat.configure(state=tkinter.NORMAL)
         self.chat.insert(tkinter.INSERT, self.file_name)
         self.chat.focus()
+
+    async def get_private_group(self, name):
+        async for dialog in self.cl.iter_dialogs():
+            if dialog.name == name:
+               return dialog.id
 
 
 async def main(interval=0.05):

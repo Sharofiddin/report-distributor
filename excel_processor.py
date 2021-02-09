@@ -72,4 +72,3 @@ class ExcelProcessor:
         except:
             traceback.print_exc()
             return None
-ExcelProcessor('file_3.xlsx').process_file()
